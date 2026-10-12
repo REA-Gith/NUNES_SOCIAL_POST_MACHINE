@@ -398,7 +398,7 @@ export default function Home(){
           {tab==="Preview" && (
             <>
               <div className="pageHeading"><div><span>PUBLISHING</span><h1>Preview & edit</h1><p>Review each platform version before publishing.</p></div><button className="primary" onClick={postEverywhere} disabled={publishing}>{publishing?"Publishing…":"Post Everywhere"}</button></div>
-              <section className="grid two">{selected.map(name=>{const p=PLATFORMS.find(x=>x[0]===name);const postText=drafts[name]||"";const media=attachments.find(x=>/^image\\/|^video\\//.test(x.type||""))||{};const url=mediaUrl||media.url||"";const isVideo=/\\.(mp4|webm|mov)(\\?|$)/i.test(url)||/^video\\//.test(media.type||"");return <article className="panel" key={name}>
+              <section className="grid two">{selected.map(name=>{const p=PLATFORMS.find(x=>x[0]===name);const postText=drafts[name]||"";const media=attachments.find(x=>/^image\/|^video\//.test(x.type||""))||{};const url=mediaUrl||media.url||"";const isVideo=/\.(mp4|webm|mov)(\?|$)/i.test(url)||/^video\//.test(media.type||"");return <article className="panel" key={name}>
                 <div className="panelHead"><h3>{name} post preview</h3><span>{p?.[2]}</span></div>
                 <small>{p?.[3]}</small>
                 <div style={{border:"1px solid var(--border, #d8dee7)",borderRadius:14,overflow:"hidden",background:"#fff",color:"#192333",margin:"16px 0",maxWidth:name==="Instagram"?440:680,marginInline:"auto"}}>
@@ -579,8 +579,8 @@ export default function Home(){
                   unique.sort((a,b)=>new Date(b.publishedAt||0)-new Date(a.publishedAt||0));
                   return unique.length?unique.map((r,i)=>{
                     const p=PLATFORMS.find(x=>x[0]===r.platform);
-                    const media=r.mediaUrl||r.attachments?.find(x=>/^image\\/|^video\\//.test(x.type||""))?.url||"";
-                    const video=/\\.(mp4|webm|mov)(\\?|$)/i.test(media)||r.attachments?.some(x=>x.url===media&&/^video\\//.test(x.type||""));
+                    const media=r.mediaUrl||r.attachments?.find(x=>/^image\/|^video\//.test(x.type||""))?.url||"";
+                    const video=/\.(mp4|webm|mov)(\?|$)/i.test(media)||r.attachments?.some(x=>x.url===media&&/^video\//.test(x.type||""));
                     return <article className="panel" key={r.id||i} style={{overflow:"hidden"}}>
                       <div className="panelHead"><div><h3>{r.platform||"Unknown"} post</h3><small>{r.publishedAt?new Date(r.publishedAt).toLocaleString():"Current attempt"}</small></div><span className={`pill ${r.status==="POSTED"?"ok":""}`}>{r.status||"UNKNOWN"}</span></div>
                       <div style={{border:"1px solid var(--border, #d8dee7)",borderRadius:14,overflow:"hidden",background:"#fff",color:"#192333",margin:"12px 0"}}>
