@@ -18,6 +18,7 @@ export default function MetaConnectPage(){
   const [oauthDetail,setOauthDetail]=useState("");
   const [viewMode,setViewMode]=useState("admin");
   const [fbHealth,setFbHealth]=useState(null);
+  const [igHealth,setIgHealth]=useState(null);
   const [testMediaUrl,setTestMediaUrl]=useState("");
   const [testCaption,setTestCaption]=useState("NUNES Instagram connection test");
   const [testResult,setTestResult]=useState("");
@@ -32,6 +33,7 @@ export default function MetaConnectPage(){
     const sj=await sr.json().catch(()=>({}));
     setState(j);
     setFbHealth(sj.integrations?.Facebook||null);
+    setIgHealth(sj.integrations?.Instagram||null);
     if(j.facebook?.pageId) setFacebookPageId(j.facebook.pageId);
     if(j.instagram?.userId) setInstagramUserId(j.instagram.userId);
     if(j.whatsapp?.wabaId) setWabaId(j.whatsapp.wabaId);
@@ -97,7 +99,7 @@ export default function MetaConnectPage(){
   const fbSignedIn=fbHealth ? Boolean(fbHealth.signedIn) : Boolean(state?.facebook?.connected);
   const fbReady=fbHealth ? Boolean(fbHealth.publishingReady) : Boolean(state?.facebook?.connected);
   const fb=fbSignedIn;
-  const ig=Boolean(state?.instagram?.connected);
+  const ig=igHealth ? Boolean(igHealth.connected) : Boolean(state?.instagram?.connected);
   const wa=Boolean(state?.whatsapp?.connected);
   const connectedCount=[fb,ig,wa].filter(Boolean).length;
 
@@ -143,6 +145,16 @@ export default function MetaConnectPage(){
             <strong>Facebook action required: {String(fbHealth.mode).replaceAll("-"," ")}</strong>
             <span>{fbHealth.actionRequired || "Reconnect Meta and grant the required Page permissions."}</span>
             {fbHealth.health?.missingPermissions?.length>0 && <small>Missing: {fbHealth.health.missingPermissions.join(", ")}</small>}
+          </div>}
+          {igHealth?.configured && !igHealth?.connected && <div className="warning instagramFixWarning">
+            <strong>Instagram needs one Meta asset link</strong>
+            <span>{igHealth.actionRequired || "Link the Instagram Professional account to the Nunes Instrumentation Facebook Page, then reconnect Meta."}</span>
+            {igHealth.repair?.detail&&<small>{igHealth.repair.detail}</small>}
+            <div className="instagramFixSteps">
+              <b>1</b><span>Meta Business Settings → Accounts → Pages → Nunes Instrumentation</span>
+              <b>2</b><span>Connected assets / Linked accounts → connect @nunesinstrumentation</span>
+              <b>3</b><span>Return here and click Reconnect Meta securely</span>
+            </div>
           </div>}
           {oauthError && <div className="warning metaError"><strong>Meta connection failed: {oauthError}</strong><span>{oauthDetail || "Retry after checking the Meta configuration and app permissions."}</span></div>}
 
@@ -242,7 +254,7 @@ export default function MetaConnectPage(){
                 </div>
               </div>}
 
-              {state?.metaConfigured && <a className="loginBtn metaLogin" href="/api/oauth/facebook/start">{fbReady?"Reconnect Meta securely":fbSignedIn?"Grant missing Facebook publishing permission":"Connect Meta securely"}</a>}
+              {state?.metaConfigured && <a className="loginBtn metaLogin" href="/api/oauth/facebook/start">{igHealth?.configured&&!igHealth?.connected?"Reconnect Meta & detect Instagram":fbReady?"Reconnect Meta securely":fbSignedIn?"Grant missing Facebook publishing permission":"Connect Meta securely"}</a>}
               <button className="secondaryBtn" onClick={refresh}>Refresh connection status</button>
             </article>
 
