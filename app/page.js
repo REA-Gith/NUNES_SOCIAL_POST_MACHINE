@@ -300,11 +300,32 @@ export default function Home(){
                 <div className="filters"><button onClick={()=>setTab("Connections")}>Account: Nunes Instruments</button><button onClick={()=>setTimeframe(v=>v==="7 Days"?"30 Days":v==="30 Days"?"90 Days":"7 Days")}>Timeframe: {timeframe}</button></div>
               </div>
 
-              <section className="metricGrid">
+              <section className="executiveHero">
+                <div className="executiveHeroCopy">
+                  <span className="eyebrow">NUNES SOCIAL COMMAND CENTER</span>
+                  <h2>Publish smarter. Keep every channel under control.</h2>
+                  <p>One professional workspace for account health, content publishing, Instagram automation and verified delivery history.</p>
+                  <div className="heroActions">
+                    <button className="primary" onClick={()=>setTab("Create Post")}>＋ Create Post</button>
+                    <button className="secondaryBtn" onClick={()=>{setTab("Auto Posting");refreshAutomation()}}>⏱ Instagram Auto Posting</button>
+                  </div>
+                </div>
+                <div className="instagramLaunchCard">
+                  <div className="igLaunchIcon">◎</div>
+                  <div>
+                    <span>INSTAGRAM AUTOMATION</span>
+                    <strong>{automation.instagramConnected?"Ready":"Needs connection"}</strong>
+                    <small>{automation.instagramConnected?(automation.accountName?"@"+automation.accountName:"Verified Professional account"):"Connect Instagram to enable scheduled auto-posting."}</small>
+                  </div>
+                  <button onClick={()=>automation.instagramConnected?setTab("Auto Posting"):window.location.href="/connect/Meta"}>{automation.instagramConnected?"Open Scheduler":"Connect Instagram"}</button>
+                </div>
+              </section>
+
+              <section className="metricGrid premiumMetrics">
                 <div className="metricCard"><span>CONNECTED NETWORKS</span><strong>{connectedCount} of {ACTIVE_SOCIAL_COUNT}</strong><small>{readyCount} configured</small></div>
                 <div className="metricCard"><span>POSTS READY</span><strong>{Object.keys(drafts).length}</strong><small>{selected.length} selected</small></div>
-                <div className="metricCard"><span>POSTED THIS RUN</span><strong>{successfulPosts}</strong><small>{results.length||0} checked</small></div>
-                <div className="metricCard"><span>STATUS</span><strong>Live</strong><small>Direct OAuth/API</small></div>
+                <div className="metricCard"><span>PUBLISHED 7 DAYS</span><strong>{publishedLast7Days}</strong><small>Saved publishing history</small></div>
+                <div className="metricCard"><span>INSTAGRAM QUEUE</span><strong>{scheduledInstagram}</strong><small>{automation.instagramConnected?"Autopilot ready":"Connection required"}</small></div>
               </section>
 
               <section className="networkCards">
