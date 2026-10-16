@@ -483,7 +483,7 @@ export default function Home(){
           {tab==="Accounts Hub" && (
             <>
               <div className="pageHeading">
-                <div><span>ACCOUNT MANAGEMENT</span><h1>Accounts Hub</h1><p>Access LinkedIn, Facebook, Instagram and WhatsApp from one system.</p></div>
+                <div><span>ACCOUNT MANAGEMENT</span><h1>Accounts Hub</h1><p>Access LinkedIn, Facebook, Instagram, YouTube and WhatsApp from one professional command center.</p></div>
                 <button onClick={refreshAccountHub}>Refresh accounts</button>
               </div>
 
@@ -720,7 +720,7 @@ export default function Home(){
                       {r.status==="POSTED"&&!r.deliveryVerified&&<small>Provider accepted the post; public visibility not independently verified.</small>}
                       {r.url&&/^https:\/\//.test(r.url)&&<a className="secondaryBtn" href={r.url} target="_blank" rel="noopener noreferrer">Open post ↗</a>}
                       {r.error&&<div className="resultMessage" role="alert">{r.error}</div>}
-                      {r.action==="RECONNECT_META"&&<a className="secondaryBtn resultAction" href="/connect/Meta">Reconnect Meta</a>}
+                      {r.action==="RECONNECT_META"&&<a className="secondaryBtn resultAction" href="/connect/Meta">Reconnect Meta</a>}{r.action==="RECONNECT_INSTAGRAM"&&<a className="secondaryBtn resultAction" href="/connect/Instagram">Reconnect Instagram</a>}
                       {appMode==="tech"&&r.technicalError&&<details className="technicalResult"><summary>Technical details</summary><pre>{r.technicalError}</pre></details>}
                     </article>
                   }):<div className="panel empty">No publishing results yet. Published attempts and saved previews will appear here.</div>;
