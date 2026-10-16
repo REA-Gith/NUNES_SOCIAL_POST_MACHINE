@@ -261,3 +261,22 @@ button,.secondaryBtn{border:1px solid var(--line);background:#fff;color:var(--in
 .waHistory{display:flex;flex-direction:column}.waHistoryRow{display:grid;grid-template-columns:1fr auto;gap:14px;border-bottom:1px solid var(--line);padding:11px 0}.waHistoryRow strong{font-size:9px}.waHistoryRow p{margin:3px 0;font-size:9px;color:#566174}.waHistoryRow span,.waHistoryRow small{display:block;font-size:8px;color:var(--muted)}
 @media(max-width:1000px){.waNumberGrid{grid-template-columns:repeat(2,1fr)}.waComposerLayout{grid-template-columns:1fr}}
 @media(max-width:650px){.waNumberGrid{grid-template-columns:1fr}.waNumberTop{grid-template-columns:36px 1fr}.waNumberTop>.pill{grid-column:1/-1;justify-self:start}.waHistoryRow{grid-template-columns:1fr}}
+
+
+/* Premium command center */
+.executiveHero{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.75fr);gap:16px;margin-bottom:16px}
+.executiveHeroCopy,.instagramLaunchCard{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 28px rgba(29,52,82,.06)}
+.executiveHeroCopy{padding:24px}.executiveHeroCopy h2{font-size:26px;line-height:1.15;margin:7px 0 8px;color:#10223d}.executiveHeroCopy p{font-size:11px;line-height:1.6;color:#66758a;max-width:760px}.heroActions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.instagramLaunchCard{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;padding:18px;background:linear-gradient(145deg,#fff 0%,#fff8fb 100%)}.instagramLaunchCard>button{grid-column:1/-1;width:100%}
+.instagramLaunchCard span{display:block;font-size:7px;font-weight:900;letter-spacing:.12em;color:#9b4f78}.instagramLaunchCard strong{display:block;font-size:18px;margin-top:3px;color:#1e2b3d}.instagramLaunchCard small{display:block;font-size:9px;line-height:1.45;color:#6a7788;margin-top:3px}
+.igLaunchIcon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:18px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)}
+.premiumMetrics .metricCard{min-height:118px;padding:17px}.premiumMetrics .metricCard strong{font-size:26px}
+
+/* Instagram automation */
+.automationStatusStrip{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.autoStatus{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;display:flex;gap:12px;align-items:center}.autoStatus.connected{border-color:#b9e5d2;background:#fbfffd}.autoStatus>span,.autoStatus div>span{display:block;font-size:8px;color:#788598}.autoStatus>strong,.autoStatus div>strong{display:block;font-size:13px;margin-top:2px}.autoStatus small{display:block;font-size:8px;color:#8a96a5;margin-top:2px}
+.automationGrid{align-items:start}.autoComposer textarea{min-height:150px}.instagramPreviewCard{min-height:480px}
+.igMock{max-width:410px;margin:6px auto;border:1px solid #dfe5ea;border-radius:15px;overflow:hidden;background:#fff;color:#1e2735}.igMockHead{display:flex;align-items:center;gap:10px;padding:12px}.igMockHead strong{display:block;font-size:10px}.igMockHead span{display:block;font-size:8px;color:#778396}.igAvatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#152640;color:#fff;font-size:9px;font-weight:800}.igMock>img,.igMockMedia{width:100%;height:310px;object-fit:cover;background:#edf1f4;display:grid;place-items:center;color:#8895a4;font-size:9px}.igMockCaption{padding:13px;font-size:10px;line-height:1.55;white-space:pre-wrap}
+.scheduleQueue{margin-top:14px}.queueList{display:flex;flex-direction:column}.queueRow{display:grid;grid-template-columns:54px minmax(0,1fr) auto auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.queueThumb{width:54px;height:54px;border-radius:9px;overflow:hidden;background:#f1f4f7;display:grid;place-items:center;font-weight:900}.queueThumb img{width:100%;height:100%;object-fit:cover}.queueInfo strong{display:block;font-size:9px}.queueInfo span,.queueInfo small{display:block;font-size:8px;color:#7b8797;margin-top:3px}.queueInfo small{color:#a34d4d}
+@media(max-width:1000px){.executiveHero{grid-template-columns:1fr}.automationStatusStrip{grid-template-columns:1fr 1fr}.queueRow{grid-template-columns:54px 1fr auto}.queueRow>.secondaryBtn{grid-column:auto}}
+@media(max-width:700px){.executiveHeroCopy h2{font-size:21px}.automationStatusStrip{grid-template-columns:1fr}.queueRow{grid-template-columns:46px 1fr}.queueRow>.pill,.queueRow>.secondaryBtn{grid-column:2}.igMock>img,.igMockMedia{height:250px}}
