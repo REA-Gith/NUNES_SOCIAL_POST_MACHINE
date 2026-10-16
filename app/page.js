@@ -267,7 +267,8 @@ export default function Home(){
           <button onClick={()=>{setTab("Accounts Hub");refreshAccountHub()}}><span>◎</span>Accounts Hub</button>
           <button onClick={()=>setTab("Connections")}><span>↗</span>Social Networks</button>
           <button onClick={()=>setTab("Create Post")}><span>▤</span>Content</button>
-          <button onClick={()=>setTab("Preview")}><span>➤</span>Publishing</button>\n          <button onClick={()=>{setTab("Auto Posting");refreshAutomation()}}><span>⏱</span>Auto Posting</button>
+          <button onClick={()=>setTab("Preview")}><span>➤</span>Publishing</button>
+          <button onClick={()=>{setTab("Auto Posting");refreshAutomation()}}><span>⏱</span>Auto Posting</button>
           <button onClick={()=>setTab("Dashboard")}><span>⌁</span>Analytics</button>
         </nav>
 
