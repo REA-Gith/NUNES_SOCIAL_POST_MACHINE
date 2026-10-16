@@ -1,11 +1,22 @@
 import crypto from "crypto";
 
-function sharedReady(){
+function directReady(){
   return Boolean(
     process.env.SOCIAL_STATE_API_URL &&
     process.env.SOCIAL_STATE_SHARED_SECRET &&
     process.env.SOCIAL_STATE_ENCRYPTION_KEY
   );
+}
+
+function bridgeReady(){
+  return Boolean(
+    process.env.SOCIAL_STATE_BRIDGE_URL &&
+    process.env.SOCIAL_STATE_BRIDGE_SECRET
+  );
+}
+
+function sharedReady(){
+  return directReady() || bridgeReady();
 }
 
 function key(){
@@ -41,17 +52,30 @@ function unseal(token){
 export async function getSharedState(stateKey){
   if(!sharedReady()) return null;
   try{
-    const url=new URL(process.env.SOCIAL_STATE_API_URL);
+    if(directReady()){
+      const url=new URL(process.env.SOCIAL_STATE_API_URL);
+      url.searchParams.set("key",stateKey);
+      const r=await fetch(url,{
+        headers:{"x-nunes-secret":process.env.SOCIAL_STATE_SHARED_SECRET},
+        cache:"no-store"
+      });
+      if(!r.ok) return null;
+      const j=await r.json();
+      const blob=j?.payload?.blob;
+      return unseal(blob);
+    }
+
+    const url=new URL(process.env.SOCIAL_STATE_BRIDGE_URL);
     url.searchParams.set("key",stateKey);
     const r=await fetch(url,{
-      headers:{"x-nunes-secret":process.env.SOCIAL_STATE_SHARED_SECRET},
+      headers:{"x-nunes-bridge-secret":process.env.SOCIAL_STATE_BRIDGE_SECRET},
       cache:"no-store"
     });
     if(!r.ok) return null;
     const j=await r.json();
-    const blob=j?.payload?.blob;
-    return unseal(blob);
-  }catch{
+    return j?.value ?? null;
+  }catch(e){
+    console.error("[SHARED STATE] read failed",String(e?.message||e));
     return null;
   }
 }
@@ -59,21 +83,39 @@ export async function getSharedState(stateKey){
 export async function setSharedState(stateKey,value){
   if(!sharedReady()) return false;
   try{
-    const r=await fetch(process.env.SOCIAL_STATE_API_URL,{
+    if(directReady()){
+      const r=await fetch(process.env.SOCIAL_STATE_API_URL,{
+        method:"POST",
+        headers:{
+          "content-type":"application/json",
+          "x-nunes-secret":process.env.SOCIAL_STATE_SHARED_SECRET
+        },
+        body:JSON.stringify({key:stateKey,payload:{blob:seal(value)}}),
+        cache:"no-store"
+      });
+      return r.ok;
+    }
+
+    const r=await fetch(process.env.SOCIAL_STATE_BRIDGE_URL,{
       method:"POST",
       headers:{
         "content-type":"application/json",
-        "x-nunes-secret":process.env.SOCIAL_STATE_SHARED_SECRET
+        "x-nunes-bridge-secret":process.env.SOCIAL_STATE_BRIDGE_SECRET
       },
-      body:JSON.stringify({key:stateKey,payload:{blob:seal(value)}}),
+      body:JSON.stringify({key:stateKey,value}),
       cache:"no-store"
     });
     return r.ok;
-  }catch{
+  }catch(e){
+    console.error("[SHARED STATE] write failed",String(e?.message||e));
     return false;
   }
 }
 
 export function sharedStateReady(){
   return sharedReady();
+}
+
+export function directSharedStateReady(){
+  return directReady();
 }
