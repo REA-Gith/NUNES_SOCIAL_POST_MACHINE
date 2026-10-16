@@ -1,4 +1,3 @@
-import { ensureInstagramConnection } from "../../../../lib/meta-instagram";
 import { NextResponse } from "next/server";
 import { OAUTH } from "../../../../lib/oauth-config";
 import { seal, cookieName, COOKIE_OPTIONS, readConfig, secretFromJar } from "../../../../lib/oauth-store";
@@ -28,6 +27,35 @@ async function exchangeLongLivedMetaToken(shortToken, clientId, clientSecret) {
     console.warn("[META OAUTH] long-lived exchange exception", String(e?.message || e));
   }
   return null;
+}
+
+
+async function exchangeLongLivedInstagramToken(shortToken, clientSecret) {
+  try {
+    const u = new URL("https://graph.instagram.com/access_token");
+    u.searchParams.set("grant_type", "ig_exchange_token");
+    u.searchParams.set("client_secret", clientSecret);
+    u.searchParams.set("access_token", shortToken);
+    const r = await fetch(u, { cache:"no-store" });
+    const j = await r.json().catch(()=>({}));
+    if (r.ok && j?.access_token) return j;
+    console.warn("[INSTAGRAM OAUTH] long-lived exchange unavailable", j?.error?.message || `HTTP ${r.status}`);
+  } catch (e) {
+    console.warn("[INSTAGRAM OAUTH] long-lived exchange exception", String(e?.message||e));
+  }
+  return null;
+}
+
+async function instagramIdentity(accessToken) {
+  const u = new URL("https://graph.instagram.com/me");
+  u.searchParams.set("fields","id,user_id,username,account_type,profile_picture_url");
+  u.searchParams.set("access_token",accessToken);
+  const r = await fetch(u,{cache:"no-store"});
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok) {
+    return { ok:false, detail:j?.error?.message || `HTTP ${r.status}`, data:j };
+  }
+  return { ok:true, data:j };
 }
 
 async function metaIdentityAndPermissions(accessToken) {
@@ -197,6 +225,22 @@ export async function GET(request, { params }) {
       if (identity.granted.length) grantedScopes = identity.granted;
     }
 
+    let instagramProfile = null;
+    if (id === "instagram" && config.instagramDirect) {
+      const longLived = await exchangeLongLivedInstagramToken(data.access_token, clientSecret);
+      if (longLived?.access_token) {
+        effectiveToken = longLived.access_token;
+        effectiveExpiresIn = Number(longLived.expires_in || effectiveExpiresIn || 0) || null;
+      }
+      const identity = await instagramIdentity(effectiveToken);
+      if (!identity.ok) {
+        console.error("[INSTAGRAM OAUTH] identity validation failed", identity.detail);
+        return NextResponse.redirect(new URL(`/connect/Instagram?error=instagram-validation&detail=${encodeURIComponent(String(identity.detail||"Instagram profile validation failed").slice(0,240))}`, publicOrigin(request)));
+      }
+      instagramProfile = identity.data;
+      grantedScopes = ["instagram_business_basic","instagram_business_content_publish"];
+    }
+
     const now = Date.now();
     const payload = {
       platform: config.label,
@@ -215,56 +259,11 @@ export async function GET(request, { params }) {
       updatedAt: now
     };
 
-    // Persist the server token before discovery. This makes the callback durable
-    // and lets all subsequent verification use the same server-side token.
-    await setSharedState(`token:${id}`, payload);
-    if (id === "facebook") await setSharedState("token:facebook", payload);
-
-    if (id === "facebook") {
-      const pageDiscovery = await discoverFacebookPage(effectiveToken);
-      const configuredFb = (await getSharedState("config:facebook")) || {};
-      const selectedPage =
-        (configuredFb.accountId
-          ? pageDiscovery.pages.find(p => String(p.id) === String(configuredFb.accountId))
-          : null) ||
-        pageDiscovery.pages.find(p => p.instagram_business_account?.id) ||
-        pageDiscovery.pages[0] ||
-        null;
-
-      if (selectedPage?.id) {
-        await setSharedState("config:facebook", {
-          ...configuredFb,
-          platform: "facebook",
-          accountId: String(selectedPage.id),
-          name: selectedPage.name || configuredFb.name || "",
-          tasks: Array.isArray(selectedPage.tasks) ? selectedPage.tasks : [],
-          metaUserId: metaProfile?.id || configuredFb.metaUserId || "",
-          connectionStatus: "connected",
-          validatedAt: now,
-          updatedAt: now,
-          savedAt: now
-        });
+    if (id === "instagram" && config.instagramDirect) {
+      const igId = String(instagramProfile?.id || instagramProfile?.user_id || data.user_id || "").trim();
+      if (!igId) {
+        return NextResponse.redirect(new URL("/connect/Instagram?error=instagram-account-id-missing", publicOrigin(request)));
       }
-
-      const existingIg = (await getSharedState("config:instagram")) || {};
-      const igRepair = await ensureInstagramConnection(
-        { ...existingIg, secondaryId: selectedPage?.id || existingIg.secondaryId || "" },
-        payload
-      );
-      if (!igRepair?.connected) {
-        console.warn("[META OAUTH] Instagram auto-link incomplete", igRepair?.reason || "unknown", igRepair?.detail || "");
-        await setSharedState("config:instagram", {
-          ...existingIg,
-          platform: "instagram",
-          accountId: "",
-          verified: false,
-          connectionStatus: "needs-attention",
-          validationError: igRepair?.reason || "not-linked",
-          updatedAt: now,
-          savedAt: existingIg.savedAt || now
-        });
-      }
-
       let businesses = [];
       try {
         const bizRes = await fetch(
