@@ -614,7 +614,7 @@ export default function Home(){
                   <div className="panelHead"><div><h2>Schedule Instagram Post</h2><p>Use a public HTTPS image or video URL. The post publishes only after Instagram is verified.</p></div><span className={automation.instagramConnected?"pill ok":"pill"}>{automation.instagramConnected?"READY":"LOCKED"}</span></div>
                   <label>Caption<textarea value={autoCaption} onChange={e=>setAutoCaption(e.target.value)} placeholder="Write the final Instagram caption, CTA and hashtags."/></label>
                   <label>Image / Reel URL<input value={autoMediaUrl} onChange={e=>setAutoMediaUrl(e.target.value)} placeholder="https://..."/></label>
-                  <label>Publish date & time<input type="datetime-local" value={autoScheduledAt} onChange={e=>setAutoScheduledAt(e.target.value)}/></label>
+                  <label>Eligible after date & time<input type="datetime-local" value={autoScheduledAt} onChange={e=>setAutoScheduledAt(e.target.value)}/><small>Vercel Hobby processes due posts once daily at 9:00 AM IST.</small></label>
                   {autoMessage&&<div className={autoMessage.includes("scheduled")?"important":"warning"}><span>{autoMessage}</span></div>}
                   <button className="primary wideBtn" onClick={saveInstagramSchedule} disabled={autoBusy||!automation.instagramConnected}>{autoBusy?"Saving…":"Schedule Auto Post"}</button>
                 </article>
@@ -630,7 +630,7 @@ export default function Home(){
               </section>
 
               <section className="panel scheduleQueue">
-                <div className="panelHead"><div><h2>Auto-post Queue</h2><p>Shared across computers. Failed posts stay visible instead of being silently retried.</p></div><span>{automation.schedules.length} items</span></div>
+                <div className="panelHead"><div><h2>Auto-post Queue</h2><p>Shared across computers. Due posts are processed at the daily 9:00 AM IST worker run; failed posts stay visible instead of being silently retried.</p></div><span>{automation.schedules.length} items</span></div>
                 <div className="queueList">
                   {automation.schedules.length?automation.schedules.map(item=><div className="queueRow" key={item.id}>
                     <div className="queueThumb">{item.mediaUrl?<img src={item.mediaUrl} alt="" loading="lazy"/>:"◎"}</div>
