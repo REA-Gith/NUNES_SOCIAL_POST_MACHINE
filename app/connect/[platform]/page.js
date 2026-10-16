@@ -14,7 +14,7 @@ const OFFICIAL = {
 const FIELDS = {
   LinkedIn:{accountLabel:"Author URN (optional now)",accountPlaceholder:"urn:li:organization:123456789"},
   Facebook:{accountLabel:"Facebook Page ID",accountPlaceholder:"123456789012345"},
-  Instagram:{accountLabel:"Instagram User ID",accountPlaceholder:"17841400000000000"},
+  Instagram:{accountLabel:"Instagram User ID (auto-detected after login)",accountPlaceholder:"Leave blank for automatic detection"},
   YouTube:{accountLabel:"YouTube Channel ID (optional)",accountPlaceholder:"UC..."}
 };
 
@@ -34,7 +34,7 @@ export default function ConnectPlatform() {
       window.location.replace("/");
       return;
     }
-    if (platform === "Facebook" || platform === "Instagram") {
+    if (platform === "Facebook") {
       window.location.replace("/connect/Meta");
     }
   }, [platform]);
@@ -115,7 +115,9 @@ export default function ConnectPlatform() {
             <article className="connectCard dashboardConnectCard">
               <div className="brandBubble" style={{ background: meta.color }}>{meta.icon}</div>
               <h2>{platform} connection</h2>
-              <p>Use the official provider authorization so NUNES can publish approved posts directly.</p>
+              <p>{platform==="Instagram"
+                ?"Connect the Instagram Professional account directly. This login is independent from the Facebook account."
+                :"Use the official provider authorization so NUNES can publish approved posts directly."}</p>
 
               <div className="modeSwitch">
                 <button className={viewMode==="admin"?"active":""} onClick={()=>setViewMode("admin")}>Admin View</button>
@@ -138,7 +140,8 @@ export default function ConnectPlatform() {
                   <h3>API Setup</h3>
                   <label>Client ID / App ID<input value={clientId} onChange={e=>setClientId(e.target.value)} placeholder="Paste Client ID / App ID" required /></label>
                   <label>Client Secret / App Secret<input type="password" value={clientSecret} onChange={e=>setClientSecret(e.target.value)} placeholder="Paste Client Secret / App Secret" required /></label>
-                  {field && <label>{field.accountLabel}<input value={accountId} onChange={e=>setAccountId(e.target.value)} placeholder={field.accountPlaceholder} /></label>}
+                  {field && <label>{field.accountLabel}<input value={accountId} onChange={e=>setAccountId(e.target.value)} placeholder={field.accountPlaceholder} disabled={platform==="Instagram"} /></label>}
+                  {platform==="Instagram"&&<div className="important"><strong>Separate Instagram login</strong><span>Use the Instagram App ID and App Secret from Meta Developers. The Instagram account does not need to be the same Facebook login used by NUNES.</span></div>}
                   <button className="primary wideBtn" type="submit">Save & Connect Now</button>
                   {saveMsg && <div className="saveMsg">{saveMsg}</div>}
                 </form>
