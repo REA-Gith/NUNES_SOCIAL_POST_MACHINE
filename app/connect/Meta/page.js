@@ -8,7 +8,6 @@ export default function MetaConnectPage(){
   const [clientSecret,setClientSecret]=useState("");
   const [configId,setConfigId]=useState("");
   const [facebookPageId,setFacebookPageId]=useState("");
-  const [instagramUserId,setInstagramUserId]=useState("");
   const [wabaId,setWabaId]=useState("");
   const [phoneNumberId,setPhoneNumberId]=useState("");
   const [whatsappToken,setWhatsappToken]=useState("");
@@ -35,7 +34,6 @@ export default function MetaConnectPage(){
     setFbHealth(sj.integrations?.Facebook||null);
     setIgHealth(sj.integrations?.Instagram||null);
     if(j.facebook?.pageId) setFacebookPageId(j.facebook.pageId);
-    if(j.instagram?.userId) setInstagramUserId(j.instagram.userId);
     if(j.whatsapp?.wabaId) setWabaId(j.whatsapp.wabaId);
     if(j.whatsapp?.phoneNumberId) setPhoneNumberId(j.whatsapp.phoneNumberId);
   }
@@ -57,7 +55,7 @@ export default function MetaConnectPage(){
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        clientId,clientSecret,configId,facebookPageId,instagramUserId,wabaId,phoneNumberId,whatsappToken
+        clientId,clientSecret,configId,facebookPageId,wabaId,phoneNumberId,whatsappToken
       })
     });
     const j=await r.json().catch(()=>({}));
@@ -132,7 +130,7 @@ export default function MetaConnectPage(){
 
         <main className="contentArea">
           <div className="pageHeading">
-            <div><span>META BUSINESS</span><h1>Connect Facebook, Instagram & WhatsApp</h1><p>One Meta setup, one authorization flow, shared encrypted connection storage.</p></div>
+            <div><span>META BUSINESS</span><h1>Connect Facebook & WhatsApp</h1><p>Facebook and WhatsApp use the Meta Business connection. Instagram is connected separately so it can use a different Instagram account.</p></div>
             <span className={connectedCount===3?"pill ok":"pill"}>{connectedCount}/3 CONNECTED</span>
           </div>
 
@@ -223,9 +221,6 @@ export default function MetaConnectPage(){
                 <label>Facebook Page ID
                   <input value={facebookPageId} onChange={e=>setFacebookPageId(e.target.value)} placeholder="Auto-detect after authorization"/>
                 </label>
-                <label>Instagram User ID
-                  <input value={instagramUserId} onChange={e=>setInstagramUserId(e.target.value)} placeholder="Auto-detect linked Professional account"/>
-                </label>
                 <label>WhatsApp Business Account ID (WABA)
                   <input value={wabaId} onChange={e=>setWabaId(e.target.value)} placeholder="Auto-detect if WhatsApp Business access is granted"/>
                 </label>
@@ -263,7 +258,7 @@ export default function MetaConnectPage(){
               <h3>Do these once in Meta Developers</h3>
               <div className="steps">
                 <div><b>1</b><span>Create/select one Meta Business app.</span></div>
-                <div><b>2</b><span>Add Facebook Login / Facebook Login for Business, Instagram API, and WhatsApp products.</span></div>
+                <div><b>2</b><span>Add Facebook Login / Facebook Login for Business and WhatsApp products. Instagram connects separately through Instagram Login.</span></div>
                 <div><b>3</b><span>Register callback URL:<small>{typeof window!=="undefined"?window.location.origin+"/api/oauth/facebook/callback":""}</small></span></div>
                 <div><b>4</b><span>Enable the required permissions, then return here and click Save & Connect Meta.</span></div>
               </div>
@@ -273,8 +268,6 @@ export default function MetaConnectPage(){
                 <span>pages_show_list</span>
                 <span>pages_read_engagement</span>
                 <span>pages_manage_posts</span>
-                <span>instagram_basic</span>
-                <span>instagram_content_publish</span>
                 <span>business_management</span>
                 <span>whatsapp_business_management</span>
                 <span>whatsapp_business_messaging</span>
