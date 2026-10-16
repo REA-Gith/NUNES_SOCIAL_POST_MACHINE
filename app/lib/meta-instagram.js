@@ -18,7 +18,7 @@ async function validateInstagramCandidate(page, fbToken) {
   const pageLookup = await graphJson(
     encodeURIComponent(String(page.id)),
     pageToken,
-    "id,name,access_token,tasks,instagram_business_account"
+    "id,name,access_token,instagram_business_account"
   );
 
   if (!pageLookup.res.ok) {
