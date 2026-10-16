@@ -260,57 +260,70 @@ async function postBluesky(body) {
 
 
 async function postInstagram(body, token, config) {
-  if (!token?.access_token) return { status: "NOT_CONNECTED" };
-  if (!body.mediaUrl) return { status: "MEDIA_REQUIRED", error: "Instagram requires a public image/video URL." };
+  if (!token?.access_token) return { status:"NOT_CONNECTED", error:"Connect Instagram before publishing." };
+  if (!body.mediaUrl) return { status:"MEDIA_REQUIRED", error:"Instagram requires a public image or video URL." };
 
-  let igUserId = config?.accountId || process.env.INSTAGRAM_USER_ID || null;
-  let accessToken = token.access_token;
+  const igUserId=String(config?.accountId||token?.instagram_user_id||"").trim();
+  if (!igUserId) return { status:"ACCOUNT_ID_REQUIRED", error:"Instagram account ID is missing. Reconnect Instagram." };
 
-  if (!igUserId) {
-    const pages = await fetch("https://graph.facebook.com/v24.0/me/accounts?fields=id,access_token,instagram_business_account&access_token=" + encodeURIComponent(token.access_token), { cache:"no-store" });
-    const pj = await pages.json().catch(()=>({}));
-    const page = (pj.data || []).find(x => x.instagram_business_account?.id);
-    if (page) {
-      igUserId = page.instagram_business_account.id;
-      accessToken = page.access_token || accessToken;
-    }
-  }
+  const direct=token?.connectionMode==="instagram-login" || config?.connectionMode==="instagram-login";
+  const graphBase=direct?"https://graph.instagram.com":"https://graph.facebook.com/v24.0";
+  const isVideo=/\.(mp4|mov|m4v|webm)(\?|$)/i.test(body.mediaUrl);
 
-  if (!igUserId) return { status:"ACCOUNT_ID_REQUIRED", error:"Connect an Instagram Professional account to a Facebook Page, or enter the Instagram User ID in API Setup." };
-
-  const isVideo = /\.(mp4|mov|m4v|webm)(\?|$)/i.test(body.mediaUrl);
-  const create = new URLSearchParams({
-    access_token: accessToken,
-    caption: body.text || ""
-  });
-  if (isVideo) {
+  const create=new URLSearchParams({access_token:token.access_token,caption:body.text||""});
+  if(isVideo){
     create.set("media_type","REELS");
     create.set("video_url",body.mediaUrl);
-  } else {
+  }else{
     create.set("image_url",body.mediaUrl);
   }
 
-  const r1 = await fetch(`https://graph.facebook.com/v24.0/${igUserId}/media`, {
+  const r1=await fetch(`${graphBase}/${encodeURIComponent(igUserId)}/media`,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:create
+    body:create,
+    cache:"no-store"
   });
-  const j1 = await r1.json().catch(()=>({}));
-  if (!r1.ok || !j1.id) return { status:"FAILED", httpStatus:r1.status, error:JSON.stringify(j1).slice(0,800) };
-
-  if (isVideo) {
-    // Give Meta a short time to process a small demo video before publish.
-    await new Promise(r=>setTimeout(r,2500));
+  const j1=await r1.json().catch(()=>({}));
+  if(!r1.ok||!j1.id){
+    return {
+      status:"FAILED",
+      httpStatus:r1.status,
+      error:"Instagram could not create the media container.",
+      technicalError:JSON.stringify(j1).slice(0,1200),
+      action:"RECONNECT_INSTAGRAM"
+    };
   }
 
-  const publish = new URLSearchParams({ creation_id:j1.id, access_token:accessToken });
-  const r2 = await fetch(`https://graph.facebook.com/v24.0/${igUserId}/media_publish`, {
+  if(isVideo){
+    for(let i=0;i<18;i++){
+      const sr=await fetch(`${graphBase}/${encodeURIComponent(j1.id)}?fields=status_code&access_token=${encodeURIComponent(token.access_token)}`,{cache:"no-store"});
+      const sj=await sr.json().catch(()=>({}));
+      if(sj.status_code==="FINISHED") break;
+      if(sj.status_code==="ERROR"||sj.status_code==="EXPIRED"){
+        return {status:"FAILED",error:"Instagram Reel processing failed.",technicalError:JSON.stringify(sj).slice(0,1200)};
+      }
+      await new Promise(r=>setTimeout(r,2500));
+    }
+  }
+
+  const publish=new URLSearchParams({creation_id:String(j1.id),access_token:token.access_token});
+  const r2=await fetch(`${graphBase}/${encodeURIComponent(igUserId)}/media_publish`,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:publish
+    body:publish,
+    cache:"no-store"
   });
-  const j2 = await r2.json().catch(()=>({}));
-  return { status:r2.ok?"POSTED":"FAILED", httpStatus:r2.status, externalId:j2.id||null, error:r2.ok?null:JSON.stringify(j2).slice(0,800) };
+  const j2=await r2.json().catch(()=>({}));
+  return {
+    status:r2.ok&&j2.id?"POSTED":"FAILED",
+    httpStatus:r2.status,
+    externalId:j2.id||null,
+    error:r2.ok?null:"Instagram publish failed.",
+    technicalError:r2.ok?null:JSON.stringify(j2).slice(0,1200),
+    accountId:igUserId,
+    connectionMode:direct?"instagram-login":"facebook-page"
+  };
 }
 
 async function postThreads(body, token, config) {
