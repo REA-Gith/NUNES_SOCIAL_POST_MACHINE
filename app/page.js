@@ -599,7 +599,7 @@ export default function Home(){
                   <div><span>Instagram</span><strong>{automation.instagramConnected?"Connected & automation ready":"Not connected"}</strong><small>{automation.accountName?"@"+automation.accountName:"Professional account required"}</small></div>
                 </div>
                 <div className="autoStatus"><span>Scheduled</span><strong>{scheduledInstagram}</strong><small>Waiting in shared queue</small></div>
-                <div className="autoStatus"><span>Worker</span><strong>Hourly</strong><small>Vercel production cron</small></div>
+                <div className="autoStatus"><span>Worker</span><strong>Daily 9:00 AM IST</strong><small>Vercel Hobby production cron</small></div>
               </section>
 
               {!automation.instagramConnected&&<div className="warning">
