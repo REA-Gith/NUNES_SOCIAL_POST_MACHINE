@@ -75,6 +75,12 @@ export default function Home(){
   const publishInFlightRef=useRef(false);
   const [publishing,setPublishing]=useState(false);
   const [publishBatchId,setPublishBatchId]=useState(null);
+  const [automation,setAutomation]=useState({instagramConnected:false,accountName:"",schedules:[]});
+  const [autoCaption,setAutoCaption]=useState("");
+  const [autoMediaUrl,setAutoMediaUrl]=useState("");
+  const [autoScheduledAt,setAutoScheduledAt]=useState("");
+  const [autoMessage,setAutoMessage]=useState("");
+  const [autoBusy,setAutoBusy]=useState(false);
 
   async function refreshConnections(){
     try{
@@ -90,6 +96,38 @@ export default function Home(){
       if(r.ok && j?.accounts) setAccountHub(j.accounts);
     }catch{}
   }
+  async function refreshAutomation(){
+    try{
+      const r=await fetch("/api/automation/schedule",{cache:"no-store"});
+      const j=await r.json();
+      if(r.ok&&j.ok) setAutomation({instagramConnected:Boolean(j.instagramConnected),accountName:j.accountName||"",schedules:Array.isArray(j.schedules)?j.schedules:[]});
+    }catch(e){console.warn("[AUTO POST UI] refresh failed",e?.message||e);}
+  }
+
+  async function saveInstagramSchedule(){
+    setAutoBusy(true);setAutoMessage("");
+    try{
+      const r=await fetch("/api/automation/schedule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add",caption:autoCaption,mediaUrl:autoMediaUrl,scheduledAt:autoScheduledAt})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.ok) throw new Error(j.error||"Unable to schedule Instagram post.");
+      setAutoCaption("");setAutoMediaUrl("");setAutoScheduledAt("");
+      setAutoMessage("Instagram post scheduled.");
+      await refreshAutomation();
+    }catch(e){setAutoMessage(e.message||"Unable to schedule Instagram post.");}
+    finally{setAutoBusy(false);}
+  }
+
+  async function updateInstagramSchedule(action,id,enabled){
+    setAutoBusy(true);setAutoMessage("");
+    try{
+      const r=await fetch("/api/automation/schedule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,id,enabled})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.ok) throw new Error(j.error||"Unable to update schedule.");
+      await refreshAutomation();
+    }catch(e){setAutoMessage(e.message||"Unable to update schedule.");}
+    finally{setAutoBusy(false);}
+  }
+
   async function refreshPublishingHistory(){
     setResultsLoading(true);
     try {
@@ -100,11 +138,13 @@ export default function Home(){
     }catch(e){setResultsError(e.message||"Could not load publishing history");}
     finally{setResultsLoading(false);}
   }
-  useEffect(()=>{refreshConnections();refreshAccountHub();refreshPublishingHistory()},[]);
+  useEffect(()=>{refreshConnections();refreshAccountHub();refreshPublishingHistory();refreshAutomation()},[]);
 
   const connectedCount=useMemo(()=>PLATFORMS.filter(p=>connections[p[0]]?.connected).length + (connections.WhatsApp?.connected?1:0),[connections]);
   const readyCount=useMemo(()=>PLATFORMS.filter(p=>connections[p[0]]?.configured).length + (connections.WhatsApp?.configured?1:0),[connections]);
   const successfulPosts=results.filter(r=>r.status==="POSTED").length;
+  const scheduledInstagram=automation.schedules.filter(x=>x.status==="SCHEDULED"&&x.enabled!==false).length;
+  const publishedLast7Days=savedResults.filter(p=>p?.external?.status==="POSTED" && Date.parse(p.publishedAt||0)>=Date.now()-7*24*60*60*1000).length;
 
   function runSearch(){
     const q=search.trim().toLowerCase();
@@ -210,7 +250,7 @@ export default function Home(){
   }
 
   const nav=[
-    ["Dashboard","⌂"],["Accounts Hub","◉"],["Create Post","＋"],["Connections","◎"],["Preview","▣"],["Results","✓"]
+    ["Dashboard","⌂"],["Accounts Hub","◉"],["Create Post","＋"],["Auto Posting","⏱"],["Connections","◎"],["Preview","▣"],["Results","✓"]
   ];
 
   return (
@@ -227,7 +267,7 @@ export default function Home(){
           <button onClick={()=>{setTab("Accounts Hub");refreshAccountHub()}}><span>◎</span>Accounts Hub</button>
           <button onClick={()=>setTab("Connections")}><span>↗</span>Social Networks</button>
           <button onClick={()=>setTab("Create Post")}><span>▤</span>Content</button>
-          <button onClick={()=>setTab("Preview")}><span>➤</span>Publishing</button>
+          <button onClick={()=>setTab("Preview")}><span>➤</span>Publishing</button>\n          <button onClick={()=>{setTab("Auto Posting");refreshAutomation()}}><span>⏱</span>Auto Posting</button>
           <button onClick={()=>setTab("Dashboard")}><span>⌁</span>Analytics</button>
         </nav>
 
