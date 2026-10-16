@@ -22,13 +22,13 @@ export const OAUTH = {
   },
   instagram: {
     label: "Instagram",
-    clientId: "META_APP_ID",
-    clientSecret: "META_APP_SECRET",
-    auth: "https://www.facebook.com/v24.0/dialog/oauth",
-    token: "https://graph.facebook.com/v24.0/oauth/access_token",
-    scope: "pages_show_list pages_read_engagement instagram_basic instagram_content_publish",
+    clientId: "INSTAGRAM_APP_ID",
+    clientSecret: "INSTAGRAM_APP_SECRET",
+    auth: "https://www.instagram.com/oauth/authorize",
+    token: "https://api.instagram.com/oauth/access_token",
+    scope: "instagram_business_basic,instagram_business_content_publish",
     clientKey: "client_id",
-    meta: true
+    instagramDirect: true
   },
   youtube: {
     label: "YouTube",
