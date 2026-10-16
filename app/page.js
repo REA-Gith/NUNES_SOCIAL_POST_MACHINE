@@ -318,7 +318,7 @@ export default function Home(){
                     <strong>{automation.instagramConnected?"Ready":"Needs connection"}</strong>
                     <small>{automation.instagramConnected?(automation.accountName?"@"+automation.accountName:"Verified Professional account"):"Connect Instagram to enable scheduled auto-posting."}</small>
                   </div>
-                  <button onClick={()=>automation.instagramConnected?setTab("Auto Posting"):window.location.href="/connect/Meta"}>{automation.instagramConnected?"Open Scheduler":"Connect Instagram"}</button>
+                  <button onClick={()=>automation.instagramConnected?setTab("Auto Posting"):window.location.href="/connect/Instagram"}>{automation.instagramConnected?"Open Scheduler":"Connect Instagram"}</button>
                 </div>
               </section>
 
@@ -332,7 +332,7 @@ export default function Home(){
               <section className="networkCards">
                 {["LinkedIn","Facebook","Instagram","YouTube","WhatsApp"].map(name=>{
                   const p=PLATFORMS.find(x=>x[0]===name);
-                  return <button key={name} className="networkCard" onClick={()=>{window.location.href=name==="WhatsApp"?"/whatsapp":(name==="Facebook"||name==="Instagram")?"/connect/Meta":`/connect/${encodeURIComponent(name)}`}}>
+                  return <button key={name} className="networkCard" onClick={()=>{window.location.href=name==="WhatsApp"?"/whatsapp":name==="Facebook"?"/connect/Meta":`/connect/${encodeURIComponent(name)}`}}>
                     <div className="networkHead"><span className="miniPlatform">{name==="WhatsApp"?"WA":p?.[1]}</span><strong>{name}</strong><em className={connections[name]?.connected?"good":"mutedDot"}>{connections[name]?.connected?"Connected":"Setup"}</em></div>
                     <div className="networkValue">{connections[name]?.connected?"Ready":"—"}</div>
                     <svg viewBox="0 0 120 32" aria-hidden="true"><polyline points="0,26 15,23 28,25 42,17 58,19 72,12 88,14 103,8 120,5" fill="none" stroke="currentColor" strokeWidth="2"/></svg>
@@ -441,7 +441,7 @@ export default function Home(){
                         <div className="capRow">{meta.caps.map(cap=><span key={cap}>{cap}</span>)}</div>
                         <div className="platformFooter">
                           <button className="selectBtn" onClick={()=>setSelected(s=>s.includes(name)?s.filter(x=>x!==name):[...s,name])}>{isSelected?"Selected ✓":"Select"}</button>
-                          {!connected && <a href={(name==="Facebook"||name==="Instagram")?"/connect/Meta":`/connect/${encodeURIComponent(name)}`}>Connect</a>}
+                          {!connected && <a href={name==="Facebook"?"/connect/Meta":`/connect/${encodeURIComponent(name)}`}>Connect</a>}
                         </div>
                       </div>
                     })}
@@ -516,11 +516,13 @@ export default function Home(){
                       :"https://business.facebook.com/latest/home";
                 const connect=hubAccount==="WhatsApp"
                   ?"/whatsapp"
-                  :(hubAccount==="Facebook"||hubAccount==="Instagram")
+                  :hubAccount==="Facebook"
                     ?"/connect/Meta"
-                    :hubAccount==="YouTube"
-                      ?"/connect/YouTube"
-                      :"/connect/LinkedIn";
+                    :hubAccount==="Instagram"
+                      ?"/connect/Instagram"
+                      :hubAccount==="YouTube"
+                        ?"/connect/YouTube"
+                        :"/connect/LinkedIn";
                 return <section className="accountHubLayout">
                   <article className="panel accountManagerPanel">
                     <div className="panelHead">
@@ -606,7 +608,7 @@ export default function Home(){
               {!automation.instagramConnected&&<div className="warning">
                 <strong>Instagram connection required</strong>
                 <span>Connect the verified Nunes Instrumentation Instagram Professional account before scheduling automatic posts.</span>
-                <a className="secondaryBtn" href="/connect/Meta">Connect Instagram</a>
+                <a className="secondaryBtn" href="/connect/Instagram">Connect Instagram</a>
               </div>}
 
               <section className="grid two automationGrid">
@@ -655,7 +657,7 @@ export default function Home(){
                   const p=PLATFORMS.find(x=>x[0]===name);
                   const meta=PLATFORM_META[name]||{};
                   const state=connections[name]||{};
-                  const href=(name==="Facebook"||name==="Instagram")?"/connect/Meta":`/connect/${encodeURIComponent(name)}`;
+                  const href=name==="Facebook"?"/connect/Meta":`/connect/${encodeURIComponent(name)}`;
                   return <article className="activeSocialCard" key={name}>
                     <div className={`platformIcon brand-${name.toLowerCase()}`}>{p?.[1]}</div>
                     <div className="activeSocialText">
