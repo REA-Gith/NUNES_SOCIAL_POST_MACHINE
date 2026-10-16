@@ -280,3 +280,10 @@ button,.secondaryBtn{border:1px solid var(--line);background:#fff;color:var(--in
 .scheduleQueue{margin-top:14px}.queueList{display:flex;flex-direction:column}.queueRow{display:grid;grid-template-columns:54px minmax(0,1fr) auto auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.queueThumb{width:54px;height:54px;border-radius:9px;overflow:hidden;background:#f1f4f7;display:grid;place-items:center;font-weight:900}.queueThumb img{width:100%;height:100%;object-fit:cover}.queueInfo strong{display:block;font-size:9px}.queueInfo span,.queueInfo small{display:block;font-size:8px;color:#7b8797;margin-top:3px}.queueInfo small{color:#a34d4d}
 @media(max-width:1000px){.executiveHero{grid-template-columns:1fr}.automationStatusStrip{grid-template-columns:1fr 1fr}.queueRow{grid-template-columns:54px 1fr auto}.queueRow>.secondaryBtn{grid-column:auto}}
 @media(max-width:700px){.executiveHeroCopy h2{font-size:21px}.automationStatusStrip{grid-template-columns:1fr}.queueRow{grid-template-columns:46px 1fr}.queueRow>.pill,.queueRow>.secondaryBtn{grid-column:2}.igMock>img,.igMockMedia{height:250px}}
+
+
+/* Instagram connection diagnosis */
+.instagramFixWarning{display:grid;gap:8px}
+.instagramFixSteps{display:grid;grid-template-columns:24px 1fr;gap:7px 9px;margin-top:4px;padding:10px;border:1px solid #efd8b5;border-radius:10px;background:#fffaf2}
+.instagramFixSteps b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#fff0d6;color:#9b6818;font-size:8px}
+.instagramFixSteps span{font-size:9px;line-height:1.45;color:#5f6875}
