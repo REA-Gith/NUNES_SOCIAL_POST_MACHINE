@@ -1,4 +1,3 @@
-import { ensureInstagramConnection } from "../../../lib/meta-instagram";
 import { cookies } from "next/headers";
 import { OAUTH, envReady, ENABLED_SOCIAL_PROVIDER_IDS } from "../../../lib/oauth-config";
 import { cookieName, unseal, readConfig, secretFromJar } from "../../../lib/oauth-store";
