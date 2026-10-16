@@ -141,7 +141,7 @@ export async function GET() {
           : health.health === "token-expired" || health.health === "token-invalid"
             ? "Reconnect Meta because the stored Facebook token is expired or invalid."
             : health.health === "limited-permissions"
-              ? "Reconnect Meta and grant the required Page and Instagram permissions."
+              ? "Reconnect Meta and grant the required Facebook Page permissions."
               : health.health === "page-access-required"
                 ? "Reconnect Meta and select/authorize the Nunes Instrumentation Page."
                 : health.health === "insufficient-page-role"
@@ -152,41 +152,28 @@ export async function GET() {
     }
 
     if (id === "instagram") {
-      const fbToken = await getSharedState("token:facebook");
-      let instagramRepair = null;
-
-      if (tokenUsable(fbToken)) {
-        instagramRepair = await ensureInstagramConnection(saved || {}, fbToken);
-        token = await getSharedState("token:instagram");
-        saved = await getSharedState("config:instagram");
-      }
-
-      const verifiedNow = Boolean(instagramRepair?.connected);
-      const connected = verifiedNow && tokenUsable(token) && Boolean(saved?.accountId) && saved?.verified === true;
+      const connected =
+        tokenUsable(token) &&
+        Boolean(saved?.accountId) &&
+        saved?.verified === true &&
+        saved?.connectionMode === "instagram-login";
 
       integrations[cfg.label] = {
         connected,
         configured,
-        mode: connected ? "connected" : configured ? "configured-action-required" : "app-setup-required",
-        accountId: connected ? saved?.accountId || "" : "",
-        name: connected ? saved?.name || token?.username || "" : "",
-        accountType: connected ? saved?.accountType || token?.account_type || "" : "",
-        facebookPageId: connected ? saved?.secondaryId || token?.facebook_page_id || "" : "",
-        facebookPageName: connected ? saved?.facebookPageName || token?.facebook_page_name || "" : "",
-        tokenExpiresAt: token?.expires_at || fbToken?.expires_at || null,
+        mode: connected ? "connected" : configured ? "ready-to-login" : "app-setup-required",
+        accountId: saved?.accountId || "",
+        name: saved?.name || token?.username || "",
+        accountType: saved?.accountType || token?.account_type || "",
+        tokenExpiresAt: token?.expires_at || null,
         verified: connected,
-        repair: instagramRepair,
+        connectionMode: saved?.connectionMode || token?.connectionMode || "",
+        sharedSaved: Boolean(token?.access_token),
         actionRequired: connected
           ? ""
-          : instagramRepair?.reason === "instagram-not-linked-to-page"
-            ? "Link the Instagram Professional account to the Facebook Page and reconnect Meta."
-            : instagramRepair?.reason === "page-discovery-failed"
-              ? "Meta could not list Pages for this login. Reconnect and grant pages_show_list."
-              : instagramRepair?.reason === "facebook-page-not-found"
-                ? "The Meta login has no accessible Facebook Page."
-                : instagramRepair?.reason === "meta-token-missing"
-                  ? "Connect Meta first."
-                  : "Reconnect Meta and grant Instagram publishing permissions."
+          : configured
+            ? "Connect the Instagram Professional account directly using Instagram Login."
+            : "Add the Instagram App ID and App Secret, then connect Instagram."
       };
       continue;
     }
