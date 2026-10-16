@@ -155,7 +155,7 @@ export default function ConnectPlatform() {
                 </>
               ) : state?.configured ? (
                 <a className="loginBtn" style={{ background: meta.color }} href={`/api/oauth/${platform.toLowerCase()}/start`}>
-                  Reconnect securely with {platform}
+                  {connected?`Reconnect securely with ${platform}`:`Connect ${platform} securely`}
                 </a>
               ) : null}
 
