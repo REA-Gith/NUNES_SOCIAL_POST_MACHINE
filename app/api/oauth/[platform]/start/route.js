@@ -44,6 +44,11 @@ export async function GET(request, { params }) {
   } else {
     url.searchParams.set("scope", config.scope);
   }
+
+  if (id === "instagram" && config.instagramDirect) {
+    url.searchParams.set("enable_fb_login", "0");
+    url.searchParams.set("force_authentication", "1");
+  }
   url.searchParams.set("state", state);
 
   if (config.google) {
