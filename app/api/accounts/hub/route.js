@@ -26,9 +26,14 @@ async function getFacebookLive(token,cfg){
 async function getInstagramLive(token,cfg){
   if(!token?.access_token || !cfg?.accountId) return [];
   try{
-    const r=await fetch(`https://graph.facebook.com/v24.0/${cfg.accountId}/media?fields=id,caption,media_type,media_url,permalink,timestamp,thumbnail_url&limit=12&access_token=${encodeURIComponent(token.access_token)}`,{cache:"no-store"});
+    const direct=token?.connectionMode==="instagram-login" || cfg?.connectionMode==="instagram-login";
+    const base=direct?"https://graph.instagram.com":"https://graph.facebook.com/v24.0";
+    const r=await fetch(`${base}/${encodeURIComponent(cfg.accountId)}/media?fields=id,caption,media_type,media_url,permalink,timestamp,thumbnail_url&limit=12&access_token=${encodeURIComponent(token.access_token)}`,{cache:"no-store"});
     const j=await r.json().catch(()=>({}));
-    if(!r.ok) return [];
+    if(!r.ok) {
+      console.warn("[ACCOUNTS HUB] Instagram feed unavailable",j?.error?.message||`HTTP ${r.status}`);
+      return [];
+    }
     return (j.data||[]).map(x=>({
       id:x.id,
       text:x.caption||"",
