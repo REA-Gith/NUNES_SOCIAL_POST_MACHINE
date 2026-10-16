@@ -1,37 +1,26 @@
-import { ensureInstagramConnection } from "../../../lib/meta-instagram";
 import { getSharedState, setSharedState } from "../../../lib/shared-state";
 
 export async function GET(){
-  let [fb,ig,wa,fbToken,igToken,waToken]=await Promise.all([
+  const [fb,wa,ig,fbToken,waToken,igToken]=await Promise.all([
     getSharedState("config:facebook"),
-    getSharedState("config:instagram"),
     getSharedState("config:whatsapp"),
+    getSharedState("config:instagram"),
     getSharedState("token:facebook"),
-    getSharedState("token:instagram"),
-    getSharedState("token:whatsapp")
+    getSharedState("token:whatsapp"),
+    getSharedState("token:instagram")
   ]);
-
-  let instagramHealth=null;
-  if(ig?.accountId && fbToken?.access_token && !igToken?.access_token){
-    instagramHealth=await ensureInstagramConnection(ig,fbToken);
-    if(instagramHealth.connected){
-      [ig,igToken]=await Promise.all([
-        getSharedState("config:instagram"),
-        getSharedState("token:instagram")
-      ]);
-    }
-  }
 
   return Response.json({
     ok:true,
     metaConfigured:Boolean(fb?.clientId&&fb?.clientSecret),
     facebook:{connected:Boolean(fbToken?.access_token),pageId:fb?.accountId||"",name:fb?.name||""},
     instagram:{
-      connected:Boolean(igToken?.access_token&&ig?.accountId),
+      connected:Boolean(igToken?.access_token&&ig?.accountId&&ig?.verified===true&&ig?.connectionMode==="instagram-login"),
       userId:ig?.accountId||"",
       name:ig?.name||igToken?.username||"",
       accountType:ig?.accountType||igToken?.account_type||"",
-      health:instagramHealth
+      connectionMode:ig?.connectionMode||"",
+      separateLogin:true
     },
     whatsapp:{connected:Boolean(waToken?.access_token),phoneNumberId:wa?.accountId||"",wabaId:wa?.secondaryId||"",phone:wa?.phone||""}
   });
@@ -44,7 +33,6 @@ export async function POST(request){
     const clientId=clean(body.clientId);
     const clientSecret=clean(body.clientSecret);
     const facebookPageId=String(body.facebookPageId||"").trim();
-    const instagramUserId=String(body.instagramUserId||"").trim();
     const wabaId=String(body.wabaId||"").trim();
     const phoneNumberId=String(body.phoneNumberId||"").trim();
     const whatsappToken=String(body.whatsappToken||"").trim();
@@ -76,16 +64,7 @@ export async function POST(request){
     }
 
     await setSharedState("config:facebook",{platform:"facebook",clientId,clientSecret,accountId:facebookPageId,secondaryId:"",configId,savedAt:Date.now()});
-    await setSharedState("config:instagram",{platform:"instagram",clientId,clientSecret,accountId:instagramUserId,secondaryId:facebookPageId,configId,savedAt:Date.now()});
     await setSharedState("config:whatsapp",{platform:"whatsapp",clientId,clientSecret,accountId:phoneNumberId,secondaryId:wabaId,savedAt:Date.now()});
-
-    if(instagramUserId){
-      const fbToken=await getSharedState("token:facebook");
-      if(fbToken?.access_token){
-        const igConfig=await getSharedState("config:instagram");
-        await ensureInstagramConnection(igConfig,fbToken);
-      }
-    }
 
     if(whatsappToken){
       await setSharedState("token:whatsapp",{platform:"WhatsApp",access_token:whatsappToken,scope:"whatsapp_business_management whatsapp_business_messaging",createdAt:Date.now()});
