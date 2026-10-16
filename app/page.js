@@ -586,6 +586,63 @@ export default function Home(){
             </>
           )}
 
+          {tab==="Auto Posting" && (
+            <>
+              <div className="pageHeading">
+                <div><span>AUTOMATION</span><h1>Instagram Auto Posting</h1><p>Schedule approved Instagram content and let the production worker publish it automatically when the account is verified.</p></div>
+                <button className="secondaryBtn" onClick={refreshAutomation}>Refresh</button>
+              </div>
+
+              <section className="automationStatusStrip">
+                <div className={automation.instagramConnected?"autoStatus connected":"autoStatus"}>
+                  <div className="igLaunchIcon">◎</div>
+                  <div><span>Instagram</span><strong>{automation.instagramConnected?"Connected & automation ready":"Not connected"}</strong><small>{automation.accountName?"@"+automation.accountName:"Professional account required"}</small></div>
+                </div>
+                <div className="autoStatus"><span>Scheduled</span><strong>{scheduledInstagram}</strong><small>Waiting in shared queue</small></div>
+                <div className="autoStatus"><span>Worker</span><strong>Hourly</strong><small>Vercel production cron</small></div>
+              </section>
+
+              {!automation.instagramConnected&&<div className="warning">
+                <strong>Instagram connection required</strong>
+                <span>Connect the verified Nunes Instrumentation Instagram Professional account before scheduling automatic posts.</span>
+                <a className="secondaryBtn" href="/connect/Meta">Connect Instagram</a>
+              </div>}
+
+              <section className="grid two automationGrid">
+                <article className="panel autoComposer">
+                  <div className="panelHead"><div><h2>Schedule Instagram Post</h2><p>Use a public HTTPS image or video URL. The post publishes only after Instagram is verified.</p></div><span className={automation.instagramConnected?"pill ok":"pill"}>{automation.instagramConnected?"READY":"LOCKED"}</span></div>
+                  <label>Caption<textarea value={autoCaption} onChange={e=>setAutoCaption(e.target.value)} placeholder="Write the final Instagram caption, CTA and hashtags."/></label>
+                  <label>Image / Reel URL<input value={autoMediaUrl} onChange={e=>setAutoMediaUrl(e.target.value)} placeholder="https://..."/></label>
+                  <label>Publish date & time<input type="datetime-local" value={autoScheduledAt} onChange={e=>setAutoScheduledAt(e.target.value)}/></label>
+                  {autoMessage&&<div className={autoMessage.includes("scheduled")?"important":"warning"}><span>{autoMessage}</span></div>}
+                  <button className="primary wideBtn" onClick={saveInstagramSchedule} disabled={autoBusy||!automation.instagramConnected}>{autoBusy?"Saving…":"Schedule Auto Post"}</button>
+                </article>
+
+                <article className="panel instagramPreviewCard">
+                  <div className="panelHead"><div><h2>Instagram Preview</h2><p>Preview the scheduled content before it enters the queue.</p></div></div>
+                  <div className="igMock">
+                    <div className="igMockHead"><div className="igAvatar">NI</div><div><strong>nunesinstrumentation</strong><span>Nunes Instrumentation</span></div></div>
+                    {autoMediaUrl?<img src={autoMediaUrl} alt="Instagram preview"/>:<div className="igMockMedia">Add a public image or Reel URL</div>}
+                    <div className="igMockCaption">{autoCaption||"Your Instagram caption preview will appear here."}</div>
+                  </div>
+                </article>
+              </section>
+
+              <section className="panel scheduleQueue">
+                <div className="panelHead"><div><h2>Auto-post Queue</h2><p>Shared across computers. Failed posts stay visible instead of being silently retried.</p></div><span>{automation.schedules.length} items</span></div>
+                <div className="queueList">
+                  {automation.schedules.length?automation.schedules.map(item=><div className="queueRow" key={item.id}>
+                    <div className="queueThumb">{item.mediaUrl?<img src={item.mediaUrl} alt="" loading="lazy"/>:"◎"}</div>
+                    <div className="queueInfo"><strong>{item.caption?.slice(0,90)||"Instagram post"}</strong><span>{item.scheduledAt?new Date(item.scheduledAt).toLocaleString():"No schedule time"}</span>{item.error&&<small>{item.error}</small>}</div>
+                    <span className={item.status==="POSTED"?"pill ok":"pill"}>{item.status}</span>
+                    {item.status==="SCHEDULED"&&<button className="secondaryBtn" onClick={()=>updateInstagramSchedule("toggle",item.id,item.enabled===false)}>{item.enabled===false?"Enable":"Pause"}</button>}
+                    <button className="secondaryBtn dangerLite" onClick={()=>updateInstagramSchedule("remove",item.id)}>Remove</button>
+                  </div>):<div className="empty">No scheduled Instagram posts yet.</div>}
+                </div>
+              </section>
+            </>
+          )}
+
           {tab==="Connections" && (
             <>
               <div className="pageHeading">
