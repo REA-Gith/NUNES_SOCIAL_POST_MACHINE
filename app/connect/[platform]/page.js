@@ -169,10 +169,10 @@ export default function ConnectPlatform() {
               <span className="eyebrow">SETUP CHECKLIST</span>
               <h3>Connect in four steps</h3>
               <div className="steps">
-                <div><b>1</b><span>Create the provider developer app once.</span></div>
-                <div><b>2</b><span>Paste Client ID/Secret in API Setup.</span></div>
+                <div><b>1</b><span>{platform==="Instagram"?"In Meta Developers, enable Instagram API with Instagram Login for the Professional account.":"Create the provider developer app once."}</span></div>
+                <div><b>2</b><span>{platform==="Instagram"?"Use the Instagram App ID and App Secret here. Facebook login credentials are not used for this account.":"Paste Client ID/Secret in API Setup."}</span></div>
                 <div><b>3</b><span>Register this callback URL:<small>{typeof window!=="undefined" ? `${window.location.origin}/api/oauth/${platform.toLowerCase()}/callback` : ""}</small></span></div>
-                <div><b>4</b><span>Click Connect securely and approve access.</span></div>
+                <div><b>4</b><span>{platform==="Instagram"?"Grant instagram_business_basic and instagram_business_content_publish, then approve the Instagram login.":"Click Connect securely and approve access."}</span></div>
               </div>
             </aside>}
           </section>
